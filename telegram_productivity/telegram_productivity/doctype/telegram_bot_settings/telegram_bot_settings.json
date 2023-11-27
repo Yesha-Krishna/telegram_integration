@@ -1,0 +1,70 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-11-09 13:57:25.546102",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "bot_settings_section",
+  "telegram_bot_name",
+  "column_break_dgrc",
+  "telegram_bot_token",
+  "telegram_user_details_section",
+  "table_ugzx"
+ ],
+ "fields": [
+  {
+   "fieldname": "telegram_bot_name",
+   "fieldtype": "Data",
+   "label": "Telegram Bot Name"
+  },
+  {
+   "fieldname": "telegram_bot_token",
+   "fieldtype": "Data",
+   "label": "Telegram Bot Token"
+  },
+  {
+   "fieldname": "bot_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Bot Settings"
+  },
+  {
+   "fieldname": "column_break_dgrc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "telegram_user_details_section",
+   "fieldtype": "Section Break",
+   "label": "User Details"
+  },
+  {
+   "fieldname": "table_ugzx",
+   "fieldtype": "Table",
+   "options": "Telegram Employee ID"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-11-09 14:21:02.622957",
+ "modified_by": "Administrator",
+ "module": "Telegram Productivity",
+ "name": "Telegram Bot Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

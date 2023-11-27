@@ -1,0 +1,74 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-11-09 14:00:40.587718",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee_id",
+  "company_email",
+  "telegram_user_id",
+  "telegram_username",
+  "telegram_phone_number",
+  "verified"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "telegram_user_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Telegram User Id"
+  },
+  {
+   "columns": 2,
+   "fieldname": "telegram_username",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Telegram Username"
+  },
+  {
+   "columns": 1,
+   "fieldname": "employee_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee Id",
+   "options": "Employee"
+  },
+  {
+   "columns": 2,
+   "fieldname": "telegram_phone_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Telegram Phone Number"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "verified",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Verified"
+  },
+  {
+   "columns": 2,
+   "fieldname": "company_email",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Company Email"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-11-21 07:33:04.105945",
+ "modified_by": "Administrator",
+ "module": "Telegram Productivity",
+ "name": "Telegram Employee ID",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
