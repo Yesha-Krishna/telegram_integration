@@ -20,8 +20,10 @@
   },
   {
    "fieldname": "telegram_bot_token",
-   "fieldtype": "Data",
-   "label": "Telegram Bot Token"
+   "fieldtype": "Password",
+   "in_list_view": 1,
+   "label": "Telegram Bot Token",
+   "reqd": 1
   },
   {
    "fieldname": "bot_settings_section",
@@ -45,7 +47,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-09 14:21:02.622957",
+ "modified": "2023-11-27 13:42:35.719288",
  "modified_by": "Administrator",
  "module": "Telegram Productivity",
  "name": "Telegram Bot Settings",
