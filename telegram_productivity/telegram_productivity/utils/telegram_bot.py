@@ -25,6 +25,7 @@ def is_user(user_id, user_name, verify_user = False):
     if verify_user:
         doc_name = frappe.db.get_value("Telegram Employee ID", {"telegram_user_id":user_id, "telegram_username":user_name}, "name")
         frappe.db.set_value("Telegram Employee ID", doc_name, {"verified":1})
+        frappe.db.commit()
         return True
     else:
         user_exists = frappe.db.exists("Telegram Employee ID", {"telegram_user_id":user_id, "telegram_username":user_name, "verified":1})
@@ -59,8 +60,8 @@ async def start_command(update: Update, context:ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(reply_text)
     elif verify_user == "Not Verified":
         keyboard = [
-            [InlineKeyboardButton("Yes", callback_data='Yes')],
-            [InlineKeyboardButton("No", callback_data='No')]
+            [InlineKeyboardButton("Yes", callback_data=json.dumps({"msg":'Yes'}))],
+            [InlineKeyboardButton("No", callback_data=json.dumps({"msg":'No'}))]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         reply_text = f"Sorry, {username}, You are not a verified user. Do you want to verify?"
@@ -120,14 +121,15 @@ async def button_click(update, context):
     # elif query.data == 'reject':
     #     query.edit_message_text(text="You declined!")
     #     text_message = f"User {user_id} has declined."
-    # if query.data == 'Yes':
-    #     if is_user(user_id, username, verify_user=True):
-    #         query.edit_message_text(text="You are verified!")
-    #         text_message = f"User {user_id} has verified."
-    #     else:
-    #         text_message = is_user(user_id, username, verify_user=True)
-    # elif query.data == 'No':
-    #     query.edit_message_text(text="Okay, Thank you")
+    if callback_data.get('msg') == 'Yes':
+        if is_user(user_id, username, verify_user=True):
+            query.edit_message_text(text="You are verified!")
+            text_message = f"User {user_id} has verified."
+        else:
+            text_message = is_user(user_id, username, verify_user=True)
+    elif callback_data.get('msg') == 'No':
+        query.edit_message_text(text="Okay, Thank you")
+        text_message = "Okay, Thank you"
     # if not text_message:
     #     text_message = "Default message or handle this case appropriately"
 
