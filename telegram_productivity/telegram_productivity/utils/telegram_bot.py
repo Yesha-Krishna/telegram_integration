@@ -1,3 +1,4 @@
+import asyncio
 import json
 import threading
 import frappe
@@ -44,7 +45,11 @@ def build_telegram_message(user_name):
 def update_doc_status(docname,status):
     print("1111111111111111111111111111111111111")
     expense_claim_doc = frappe.get_doc("Expense Claim",{"name":docname})
-    expense_claim_doc.docstatus = 1
+    if status =="Approved":
+        expense_claim_doc.docstatus = 1
+    elif status == "Rejected":
+        expense_claim_doc.docstatus = 0
+        expense_claim_doc.workflow_state = status
     expense_claim_doc.approval_status = status
     expense_claim_doc.save()
     frappe.db.commit()
@@ -154,7 +159,11 @@ def start():
 
     #Polls
     print("Polling...")
+    loop = asyncio.get_event_loop()
+    print("Currently running loop ",loop)
     application.run_polling(poll_interval=3)
+    # loop = asyncio.get_event_loop()
+    # print("Currently running loop ",loop)
 
 # @frappe.whitelist()
 # def thread_call():
