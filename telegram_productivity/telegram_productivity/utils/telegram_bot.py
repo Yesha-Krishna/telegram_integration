@@ -1,6 +1,6 @@
 import asyncio
 import json
-import threading
+import requests
 import frappe
 import telegram
 from typing import Final
@@ -13,15 +13,17 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
-#geting bot token
-def get_token(bot_name):
-    doc_name = frappe.db.get_value("Telegram Bot Settings", filters={"telegram_bot_name":bot_name}, fieldname ="name")
-    return frappe.get_doc("Telegram Bot Settings",doc_name).get_password("telegram_bot_token")
 
 BOT_USERNAME: Final = '@api_testt_bot'
 TOKEN = get_token('@api_testt_bot')
 bot = telegram.Bot(token=TOKEN)
 
+#geting bot token
+def get_token(bot_name):
+    doc_name = frappe.db.get_value("Telegram Bot Settings", filters={"telegram_bot_name":bot_name}, fieldname ="name")
+    return frappe.get_doc("Telegram Bot Settings",doc_name).get_password("telegram_bot_token")
+
+#verifying user
 def is_user(user_id, user_name, verify_user = False):
     if verify_user:
         doc_name = frappe.db.get_value("Telegram Employee ID", {"telegram_user_id":user_id, "telegram_username":user_name}, "name")
@@ -144,24 +146,24 @@ async def button_click(update, context):
         message_id=query.message.message_id,
         text=text_message
     )
-@frappe.whitelist()
-def start():
-    print("Starting bot...")
-    application = ApplicationBuilder().token(token=TOKEN).build()
+# @frappe.whitelist()
+# def start():
+#     print("Starting bot...")
+application = ApplicationBuilder().token(token=TOKEN).build()
 
-    #Commands
-    application.add_handler(CommandHandler("start", start_command))
-    application.add_handler(CommandHandler("test", test_command))
-    application.add_handler(CallbackQueryHandler(button_click))
+#Commands
+application.add_handler(CommandHandler("start", start_command))
+application.add_handler(CommandHandler("test", test_command))
+application.add_handler(CallbackQueryHandler(button_click))
 
-    #Messages
-    application.add_handler(MessageHandler(filters.TEXT, handle_message))
+#Messages
+application.add_handler(MessageHandler(filters.TEXT, handle_message))
 
     #Polls
-    print("Polling...")
-    loop = asyncio.get_event_loop()
-    print("Currently running loop ",loop)
-    application.run_polling(poll_interval=3)
+    # print("Polling...")
+    # loop = asyncio.get_event_loop()
+    # print("Currently running loop ",loop)
+    # application.run_polling(poll_interval=3)
     # loop = asyncio.get_event_loop()
     # print("Currently running loop ",loop)
 
@@ -169,3 +171,26 @@ def start():
 # def thread_call():
 #     t = threading.Thread(target=start)
 #     t.start()
+
+@frappe.whitelist(allow_guest=True)
+def webhook():
+    json_str = requests.get_data().decode('UTF-8')
+    update = Update.de_json(json.loads(json_str), bot)
+    application.process_update(update)
+    return ''
+
+def set_webhook_url():
+    webhook_url = 'https://your_domain.com/your_webhook_path'
+
+    api_url = f'https://api.telegram.org/bot{TOKEN}/setWebhook?url={webhook_url}'
+
+    response = requests.get(api_url)
+
+    # Check the response to ensure the webhook was set up successfully
+    if response.ok:
+        print(f'Webhook URL set successfully: {webhook_url}')
+    else:
+        print(f'Failed to set webhook URL. Response: {response.text}')
+
+# Call the set_webhook_url function to set up the webhook
+set_webhook_url()
