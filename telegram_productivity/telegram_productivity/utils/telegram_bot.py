@@ -5,7 +5,7 @@ import frappe
 import telegram
 from typing import Final
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, ApplicationBuilder, CallbackQueryHandler
+from telegram.ext import Application,CommandHandler,CallbackContext, MessageHandler, filters, ContextTypes, ApplicationBuilder, CallbackQueryHandler, Updater
 import logging
 
 
@@ -14,14 +14,17 @@ logging.basicConfig(
     level=logging.INFO
 )
 
-BOT_USERNAME: Final = '@api_testt_bot'
-TOKEN = get_token('@api_testt_bot')
-bot = telegram.Bot(token=TOKEN)
-
 #geting bot token
 def get_token(bot_name):
     doc_name = frappe.db.get_value("Telegram Bot Settings", filters={"telegram_bot_name":bot_name}, fieldname ="name")
     return frappe.get_doc("Telegram Bot Settings",doc_name).get_password("telegram_bot_token")
+
+BOT_USERNAME: Final = '@api_testt_bot'
+TOKEN = get_token('@api_testt_bot')
+bot = telegram.Bot(token=TOKEN)
+
+def remove_webhook():
+    bot.removeWebhook()
 
 #verifying user
 def is_user(user_id, user_name, verify_user = False):
@@ -45,7 +48,6 @@ def build_telegram_message(user_name):
     return message
 
 def update_doc_status(docname,status):
-    print("1111111111111111111111111111111111111")
     expense_claim_doc = frappe.get_doc("Expense Claim",{"name":docname})
     if status =="Approved":
         expense_claim_doc.docstatus = 1
@@ -58,32 +60,36 @@ def update_doc_status(docname,status):
     print(f"Document {docname} has been updated")
     return True
 
-async def start_command(update: Update, context:ContextTypes.DEFAULT_TYPE):
-    user_id = update.message.chat.id
-    username = update.message.chat.username
-    verify_user = is_user(user_id,username)
-    if verify_user == "Verified":
-        reply_text = f"Welcome, {username}, You are verified user."
-        await update.message.reply_text(reply_text)
-    elif verify_user == "Not Verified":
-        keyboard = [
-            [InlineKeyboardButton("Yes", callback_data=json.dumps({"msg":'Yes'}))],
-            [InlineKeyboardButton("No", callback_data=json.dumps({"msg":'No'}))]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        reply_text = f"Sorry, {username}, You are not a verified user. Do you want to verify?"
-        await update.message.reply_text(reply_text, reply_markup=reply_markup)
-    elif verify_user == "User Not Found":
-        reply_text = "User Not Found"
-        await update.message.reply_text(reply_text)
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    try:
+        frappe.log_error("entered start")
+        user_id = update.message.chat.id
+        username = update.message.chat.username
+        verify_user = is_user(user_id,username)
+        frappe.log_error(verify_user)
+        if verify_user == "Verified":
+            reply_text = f"Welcome, {username}, You are verified user."
+            await update.message.reply_text(reply_text)
+        elif verify_user == "Not Verified":
+            keyboard = [
+                [InlineKeyboardButton("Yes", callback_data=json.dumps({"msg":'Yes'}))],
+                [InlineKeyboardButton("No", callback_data=json.dumps({"msg":'No'}))]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            reply_text = f"Sorry, {username}, You are not a verified user. Do you want to verify?"
+            await update.message.reply_text(reply_text, reply_markup=reply_markup)
+        elif verify_user == "User Not Found":
+            reply_text = "User Not Found"
+            await update.message.reply_text(reply_text)
+    except Exception as e:
+        frappe.log_error(str(e))
 
-async def handle_message(update: Update, context:ContextTypes.DEFAULT_TYPE):
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     print(f"User ID {update.message.chat.id} sends message as {text} in {update.message.chat.type}")
     await update.message.reply_text("BOT is in developing stage... Will send you notification once the build is done")
 
 async def send_notification(user_id,username,from_user,doc_name):
-    print("====+++++++++++++++==============")
     message = build_telegram_message(from_user)
     callback_data_approve = json.dumps({"status":"Approved","docname":doc_name})
     callback_data_reject = json.dumps({"status":"Rejected","docname":doc_name})
@@ -95,6 +101,7 @@ async def send_notification(user_id,username,from_user,doc_name):
     await bot.send_message(chat_id=user_id, text=message,reply_markup=reply_markup)
 
 async def test_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    frappe.log_error("entered test")
     # Create an inline keyboard with "Approve" and "Decline" buttons
     keyboard = [
         [InlineKeyboardButton("Approve", callback_data='approve')],
@@ -106,81 +113,122 @@ async def test_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Do you approve or decline?", reply_markup=reply_markup)
 
 async def button_click(update, context):
-    query = update.callback_query
-    print(query)
-    callback_data =json.loads(query.data)
-    user_id=query.from_user.id
-    username = query.from_user.username
-    query.answer()
-    text_message = ''
-    if callback_data.get('status') == 'Approved':
-        if update_doc_status(docname=callback_data.get('docname'),status=callback_data.get('status')):
-            text_message = "Expense claim has been approved"
-        else:
-            print("error occured on update_doc-status")
-    elif callback_data.get('status') == 'Rejected':
-        if update_doc_status(docname=callback_data.get('docname'),status=callback_data.get('status')):
-            text_message = "Expense claim has been rejected"
-    # Handle button clicks here
-    # if query.data == 'approve':
-    #     query.edit_message_text(text="You approved!")
-    #     text_message = f"User {user_id} has approved."
-    # elif query.data == 'reject':
-    #     query.edit_message_text(text="You declined!")
-    #     text_message = f"User {user_id} has declined."
-    if callback_data.get('msg') == 'Yes':
-        if is_user(user_id, username, verify_user=True):
-            query.edit_message_text(text="You are verified!")
-            text_message = f"User {user_id} has verified."
-        else:
-            text_message = is_user(user_id, username, verify_user=True)
-    elif callback_data.get('msg') == 'No':
-        query.edit_message_text(text="Okay, Thank you")
-        text_message = "Okay, Thank you"
-    # if not text_message:
-    #     text_message = "Default message or handle this case appropriately"
+    try:
+        query = update.callback_query
+        callback_data =json.loads(query.data)
+        user_id=query.from_user.id
+        username = query.from_user.username
+        query.answer()
+        text_message = ''
+        if callback_data.get('status') == 'Approved':
+            if update_doc_status(docname=callback_data.get('docname'),status=callback_data.get('status')):
+                text_message = "Expense claim has been approved"
+            else:
+                print("error occured on update_doc-status")
+        elif callback_data.get('status') == 'Rejected':
+            if update_doc_status(docname=callback_data.get('docname'),status=callback_data.get('status')):
+                text_message = "Expense claim has been rejected"
+        # Handle button clicks here
+        if query.data == 'approve':
+            query.edit_message_text(text="You approved!")
+            text_message = f"User {user_id} has approved."
+        elif query.data == 'reject':
+            query.edit_message_text(text="You declined!")
+            text_message = f"User {user_id} has declined."
+        if callback_data.get('msg') == 'Yes':
+            if is_user(user_id, username, verify_user=True):
+                query.edit_message_text(text="You are verified!")
+                text_message = f"User {user_id} has verified."
+            else:
+                text_message = is_user(user_id, username, verify_user=True)
+        elif callback_data.get('msg') == 'No':
+            query.edit_message_text(text="Okay, Thank you")
+            text_message = "Okay, Thank you"
+        # if not text_message:
+        #     text_message = "Default message or handle this case appropriately"
 
-    # You can also edit the original message if needed
-    await context.bot.edit_message_text(
-        chat_id=user_id,
-        message_id=query.message.message_id,
-        text=text_message
-    )
-# @frappe.whitelist()
-# def start():
-#     print("Starting bot...")
-application = ApplicationBuilder().token(token=TOKEN).build()
+        # You can also edit the original message if needed
+        await context.bot.edit_message_text(
+            chat_id=user_id,
+            message_id=query.message.message_id,
+            text=text_message
+        )
+    except Exception as e:
+        frappe.log_error(str(e))
 
-#Commands
-application.add_handler(CommandHandler("start", start_command))
-application.add_handler(CommandHandler("test", test_command))
-application.add_handler(CallbackQueryHandler(button_click))
+# application = ApplicationBuilder().token(TOKEN).build()
+# frappe.log_error("Application instance created")
+# #Commands
+# application.add_handler(CommandHandler("start", start_command))
+# application.add_handler(CommandHandler("test", test_command))
+# application.add_handler(CallbackQueryHandler(button_click))
 
-#Messages
-application.add_handler(MessageHandler(filters.TEXT, handle_message))
+# #Messages
+# application.add_handler(MessageHandler(filters.TEXT, handle_message))
 
-    #Polls
-    # print("Polling...")
-    # loop = asyncio.get_event_loop()
-    # print("Currently running loop ",loop)
-    # application.run_polling(poll_interval=3)
-    # loop = asyncio.get_event_loop()
-    # print("Currently running loop ",loop)
+def process_telegram_update(update: Update) -> None:
+    # Extract information from the update
+    user_id = update.message.from_user.id
+    user_name = update.message.from_user.username
+    user_message = update.message.text
 
-# @frappe.whitelist()
-# def thread_call():
-#     t = threading.Thread(target=start)
-#     t.start()
+    if user_message == "/start":
+        asyncio.run(start_command(update))
+    elif user_message == "/test":
+        asyncio.run(test_command(update))
+    else:
+        asyncio.run(handle_message(update))
+
+    # Your custom processing logic here...
+    processed_message = f"Hello, {user_name}! You said: {user_message}"
+    frappe.log_error("Processsed telgram update successfully")
+    # Send a response back to the user
+    # await update.message.reply_text(text=processed_message)
+
+def process_callback_query(update: Update):
+    try:
+        query = update.callback_query
+        data = query.data
+        message  = ''
+        if data == 'approve':
+            message = "You're approveed"
+        elif data == 'reject':
+            message = "You're rejected"
+
+       # bot.answer_callback_query(callback_query_id = query.id,text = message)
+         # Send a reply message
+        bot.send_message(
+            chat_id=query.from_user.id,
+            text=message,
+            reply_to_message_id=query.message.id,
+            )
+    except Exception as e:
+        frappe.log_error(str(e))
+
 
 @frappe.whitelist(allow_guest=True)
 def webhook():
-    json_str = requests.get_data().decode('UTF-8')
-    update = Update.de_json(json.loads(json_str), bot)
-    application.process_update(update)
-    return ''
+    try:
+        if frappe.request.data:
+            update = Update.de_json(json.loads(frappe.request.data), bot)
+            frappe.log_error("Telegram Webhook", f"Update object: {update}")
+            # frappe.log_error(application)
+            if update.message:
+                process_telegram_update(update)
+            if update.callback_query:
+                process_callback_query(update)
+            frappe.response["status"] = "OK"
+            return "OK"
+    except Exception as e:
+        frappe.log_error(str(e))
+        frappe.response["error"] = str(e)
+        frappe.response["status"] ="ERROR"
+        return "500"
 
+
+@frappe.whitelist(allow_guest=True)
 def set_webhook_url():
-    webhook_url = 'https://your_domain.com/your_webhook_path'
+    webhook_url = 'https://alfarsi.aerele.in/api/method/telegram_productivity.telegram_productivity.utils.telegram_bot.webhook'
 
     api_url = f'https://api.telegram.org/bot{TOKEN}/setWebhook?url={webhook_url}'
 
@@ -192,5 +240,17 @@ def set_webhook_url():
     else:
         print(f'Failed to set webhook URL. Response: {response.text}')
 
-# Call the set_webhook_url function to set up the webhook
-set_webhook_url()
+@frappe.whitelist()
+def start():
+    print("Starting bot...")
+    application = ApplicationBuilder().token(token=TOKEN).build()
+
+    #Commands
+    application.add_handler(CommandHandler("start", start_command))
+    application.add_handler(CommandHandler("test", test_command))
+    application.add_handler(CallbackQueryHandler(button_click))
+
+    #Messages
+    application.add_handler(MessageHandler(filters.TEXT, handle_message))
+
+    application.run_polling(poll_interval=2)
