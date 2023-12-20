@@ -1,0 +1,67 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-12-20 16:02:49.959083",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_z6h3",
+  "user",
+  "telegram_user_id",
+  "telegram_username",
+  "telegram_phone_number",
+  "verified"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_z6h3",
+   "fieldtype": "Section Break",
+   "label": "User Details"
+  },
+  {
+   "columns": 2,
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "label": "User",
+   "options": "User"
+  },
+  {
+   "columns": 2,
+   "fieldname": "telegram_user_id",
+   "fieldtype": "Data",
+   "label": "Telegram User ID"
+  },
+  {
+   "columns": 2,
+   "fieldname": "telegram_username",
+   "fieldtype": "Data",
+   "label": "Telegram UserName"
+  },
+  {
+   "columns": 2,
+   "fieldname": "telegram_phone_number",
+   "fieldtype": "Phone",
+   "label": "Telegram Phone Number"
+  },
+  {
+   "columns": 2,
+   "default": "0",
+   "fieldname": "verified",
+   "fieldtype": "Check",
+   "label": "Verified"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-12-20 16:13:13.618294",
+ "modified_by": "Administrator",
+ "module": "Telegram Productivity",
+ "name": "Telegram User Details",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
