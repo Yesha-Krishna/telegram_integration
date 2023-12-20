@@ -48,7 +48,6 @@ def build_telegram_message(user_name):
 	return message
 
 def update_doc_status(docname,status,user_id):
-<<<<<<< HEAD
 	expense_claim_doc = frappe.get_doc("Expense Claim",{"name":docname})
 	if status =="Approved":
 		expense_claim_doc.docstatus = 1
@@ -60,19 +59,6 @@ def update_doc_status(docname,status,user_id):
 	frappe.db.commit()
 	print(f"Document {docname} has been updated")
 	return True
-=======
-    expense_claim_doc = frappe.get_doc("Expense Claim",{"name":docname})
-    if status =="Approved":
-        expense_claim_doc.docstatus = 1
-    elif status == "Rejected":
-        expense_claim_doc.docstatus = 0
-        expense_claim_doc.workflow_state = status
-    expense_claim_doc.approval_status = status
-    expense_claim_doc.save()
-    frappe.db.commit()
-    print(f"Document {docname} has been updated")
-    return True
->>>>>>> 7943c7da36b44efc0cf44bd0608f5b7e119b6e80
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 	try:
@@ -159,7 +145,6 @@ async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
 	context.user_data['state'] = "EMAIL_REGISTER_STATE"
 
 async def button_click(update, context):
-<<<<<<< HEAD
 	try:
 		query = update.callback_query
 		callback_data =json.loads(query.data)
@@ -198,41 +183,6 @@ async def button_click(update, context):
 			text_message = "Okay, Thank you"
 		# if not text_message:
 		#     text_message = "Default message or handle this case appropriately"
-=======
-    try:
-        query = update.callback_query
-        callback_data =json.loads(query.data)
-        user_id=query.from_user.id
-        username = query.from_user.username
-        query.answer()
-        text_message = ''
-        if callback_data.get('status') == 'Approved':
-            if update_doc_status(docname=callback_data.get('docname'),status=callback_data.get('status'), user_id = user_id):
-                text_message = "Expense claim has been approved"
-            else:
-                print("error occured on update_doc-status")
-        elif callback_data.get('status') == 'Rejected':
-            if update_doc_status(docname=callback_data.get('docname'),status=callback_data.get('status'), user_id = user_id):
-                text_message = "Expense claim has been rejected"
-        # Handle button clicks here
-        if query.data == 'approve':
-            query.edit_message_text(text="You approved!")
-            text_message = f"User {user_id} has approved."
-        elif query.data == 'reject':
-            query.edit_message_text(text="You declined!")
-            text_message = f"User {user_id} has declined."
-        if callback_data.get('msg') == 'Yes':
-            if is_user(user_id, username, verify_user=True):
-                query.edit_message_text(text="You are verified!")
-                text_message = f"User {user_id} has verified."
-            else:
-                text_message = is_user(user_id, username, verify_user=True)
-        elif callback_data.get('msg') == 'No':
-            query.edit_message_text(text="Okay, Thank you")
-            text_message = "Okay, Thank you"
-        # if not text_message:
-        #     text_message = "Default message or handle this case appropriately"
->>>>>>> 7943c7da36b44efc0cf44bd0608f5b7e119b6e80
 
 		# You can also edit the original message if needed
 		await context.bot.edit_message_text(
