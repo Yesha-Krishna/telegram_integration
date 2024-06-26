@@ -17,7 +17,8 @@ logging.basicConfig(
 #geting bot token
 def get_token(bot_name):
 	doc_name = frappe.db.get_value("Telegram Bot Settings", filters={"telegram_bot_name":bot_name}, fieldname ="name")
-	return frappe.get_doc("Telegram Bot Settings",doc_name).get_password("telegram_bot_token")
+	return frappe.db.get_value("Telegram Bot Settings",doc_name,"telegram_bot_token")
+	# return frappe.db.get_value("Telegram Bot Settings",doc_name).get_password("telegram_bot_token", raise_exception=False)
 
 BOT_USERNAME: Final = '@api_testt_bot'
 TOKEN = get_token('@api_testt_bot')
@@ -119,10 +120,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 	username = update.message.chat.username
 	text = update.message.text
 	state = user_data.get("state", None)
+	reply_text = str()
 	if state == "EMAIL_REGISTER_STATE":
-		register_telegram_user(user_id=user_id, username=username, email=text)
+		is_registered = register_telegram_user(user_id=user_id, username=username, email=text)
 		print(f"User ID {update.message.chat.id} sends message as {text} in {update.message.chat.type}")
-		await update.message.reply_text("User registered succesfully")
+		reply_text = "User registered succesfully"
+		if not is_registered:
+			reply_text = "User not created. Please inform admin to create user on ERP."
+		await update.message.reply_text(reply_text)
 
 async def send_notification(user_id,username,from_user,doc_name, status):
 	message = build_telegram_message(from_user)
