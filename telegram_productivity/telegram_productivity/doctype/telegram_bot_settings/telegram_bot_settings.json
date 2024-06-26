@@ -10,7 +10,7 @@
   "column_break_dgrc",
   "telegram_bot_token",
   "telegram_user_details_section",
-  "table_ugzx"
+  "user_details"
  ],
  "fields": [
   {
@@ -20,7 +20,7 @@
   },
   {
    "fieldname": "telegram_bot_token",
-   "fieldtype": "Password",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Telegram Bot Token",
    "reqd": 1
@@ -40,14 +40,15 @@
    "label": "User Details"
   },
   {
-   "fieldname": "table_ugzx",
+   "fieldname": "user_details",
    "fieldtype": "Table",
-   "options": "Telegram Employee ID"
+   "label": "User Details",
+   "options": "Telegram User Details"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-27 13:42:35.719288",
+ "modified": "2024-06-26 12:30:31.909512",
  "modified_by": "Administrator",
  "module": "Telegram Productivity",
  "name": "Telegram Bot Settings",
