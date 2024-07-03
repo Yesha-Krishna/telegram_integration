@@ -20,9 +20,12 @@ def get_token(bot_name):
 	return frappe.db.get_value("Telegram Bot Settings",doc_name,"telegram_bot_token")
 	# return frappe.db.get_value("Telegram Bot Settings",doc_name).get_password("telegram_bot_token", raise_exception=False)
 
-BOT_USERNAME: Final = '@api_testt_bot'
-TOKEN = get_token('@api_testt_bot')
-bot = telegram.Bot(token=TOKEN)
+doc = frappe.get_all("Telegram Bot Settings", {}, "*")
+for value in doc:
+	if value.get("enabled"):
+		BOT_USERNAME: Final = value.get("telegram_bot_name")
+		TOKEN = get_token(BOT_USERNAME)
+		bot = telegram.Bot(token=TOKEN)
 
 def remove_webhook():
 	bot.removeWebhook()

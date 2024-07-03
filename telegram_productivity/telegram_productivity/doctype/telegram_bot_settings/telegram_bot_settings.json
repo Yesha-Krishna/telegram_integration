@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "bot_settings_section",
+  "enabled",
   "telegram_bot_name",
   "column_break_dgrc",
   "telegram_bot_token",
@@ -14,9 +15,11 @@
  ],
  "fields": [
   {
+   "description": "Example - @user_name",
    "fieldname": "telegram_bot_name",
    "fieldtype": "Data",
-   "label": "Telegram Bot Name"
+   "label": "Telegram Bot Name",
+   "reqd": 1
   },
   {
    "fieldname": "telegram_bot_token",
@@ -40,15 +43,22 @@
    "label": "User Details"
   },
   {
+   "columns": 6,
    "fieldname": "user_details",
    "fieldtype": "Table",
    "label": "User Details",
    "options": "Telegram User Details"
+  },
+  {
+   "default": "0",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-06-26 12:30:31.909512",
+ "modified": "2024-07-01 15:46:19.789146",
  "modified_by": "Administrator",
  "module": "Telegram Productivity",
  "name": "Telegram Bot Settings",
