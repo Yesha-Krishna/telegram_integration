@@ -11,8 +11,12 @@ def send_telegram_msg(self, method):
 			from_user = self.employee_name # frappe.db.get_value("Telegram User Details", {"user":employee_id}, ["telegram_username"])
 			user_id, username = frappe.db.get_value("Telegram User Details", {"user":expense_approver}, ["telegram_user_id", "telegram_username"])
 			doc_name =self.name
-			asyncio.run(send_notification(user_id=user_id,username=username,doc_name=doc_name,status = self.approval_status,from_user = from_user))
+			loop = asyncio.new_event_loop()
+			asyncio.set_event_loop(loop)
+			loop.run_until_complete(send_notification(user_id=user_id,username=username,doc_name=doc_name,status = self.approval_status,from_user = from_user))
+			#asyncio.run(send_notification(user_id=user_id,username=username,doc_name=doc_name,status = self.approval_status,from_user = from_user))
 			frappe.msgprint("telegram notification sent successfully")
+
 		elif self.approval_status == 'Approved':
 			user_id = frappe.db.get_value("Employee",filters = {"name":self.employee},fieldname = "user_id")
 			from_user = self.expense_approver
@@ -27,5 +31,6 @@ def send_telegram_msg(self, method):
 				frappe.msgprint("telegram notification sent to HR successfully")
 		else:
 			frappe.log_error(str(e))
+		loop.close()
 	except Exception as e:
 		frappe.log_error(str(e))

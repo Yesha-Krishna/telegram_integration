@@ -68,7 +68,7 @@ app_license = "mit"
 # ------------
 
 # before_install = "telegram_productivity.install.before_install"
-# after_install = "telegram_productivity.install.after_install"
+after_migrate = "telegram_productivity.telegram_productivity.utils.overrides.after_migrate"
 
 # Uninstallation
 # ------------
@@ -114,10 +114,10 @@ app_license = "mit"
 # ---------------
 # Override standard doctype classes
 
-override_doctype_class = {
+# override_doctype_class = {
 	# "ToDo": "custom_app.overrides.CustomToDo"
     # "Expense Claim": "telegram_productivity.telegram_productivity.utils.overrides.Notification"
-}
+# }
 
 # Document Events
 # ---------------

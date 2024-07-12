@@ -24,3 +24,40 @@
 # 			# 	frappe.db.commit()
 # 		else:
 # 			print("else block ========== elseblock")
+import frappe
+from telegram_productivity.telegram_productivity.utils.telegram_bot import main
+from telegram import Bot
+import asyncio
+from frappe import request
+import json
+
+@frappe.whitelist(allow_guest=True)
+def telegram_webhook():
+    # Get the bot instance
+    application = frappe.local.telegram_application
+
+    # Process the update
+    if request.method == "POST":
+        update = json.loads(frappe.request.data)
+        application.update_queue.put(update)
+    
+    return "OK"
+
+def get_application():
+    return asyncio.run(main())
+
+def after_migrate():
+    print("Telegram bot installed - Migrate")
+    print("Telegram bot installed - Install")
+    # Replace 'YOUR TOKEN' and 'YOUR WEBHOOK URL' with your actual bot token and webhook URL
+    bot = Bot("7177299800:AAHVyt9iDJGukGdHaVKXJojKStEgQyxG0tI")
+    webhook_url = "https://ffd4-2401-4900-1ce0-3808-4d7b-4338-b0b6-24a2.ngrok-free.app/api/method/telegram_productivity.telegram_productivity.utils.overrides.telegram_webhook"
+    bot.set_webhook(url=webhook_url)
+    frappe.local.telegram_application = get_application()
+    
+# def after_install():
+#     print("Telegram bot installed - Install")
+#     # Replace 'YOUR TOKEN' and 'YOUR WEBHOOK URL' with your actual bot token and webhook URL
+#     bot = Bot("7177299800:AAHVyt9iDJGukGdHaVKXJojKStEgQyxG0tI")
+#     webhook_url = "https://ffd4-2401-4900-1ce0-3808-4d7b-4338-b0b6-24a2.ngrok-free.app/api/method/telegram_productivity.telegram_productivity.utils.overrides.telegram_webhook"
+#     bot.set_webhook(url=webhook_url)
